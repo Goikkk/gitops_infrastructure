@@ -62,6 +62,11 @@ jobs:
             --query 'imageDetails[].imageTags[]' \
             --output text | tr '\t' '\n')
 
+          if [[ -z "$TAGS" ]]; then
+            TAGS="0.0.0"
+            echo "Empty repository. Setting initial tag: $TAGS"
+          fi
+
           BUMPED_TAG=$(bash .github/scripts/bump_version.sh $BUMP_TYPE "$TAGS")
           echo "Bumped tag: $BUMPED_TAG"
 
