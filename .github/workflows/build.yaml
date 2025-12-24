@@ -63,6 +63,8 @@ jobs:
             --output text | tr '\t' '\n')
 
           BUMPED_TAG=$(bash .github/scripts/bump_version.sh $BUMP_TYPE "$TAGS")
+          echo "Bumped tag: $BUMPED_TAG"
+
           echo "image_tag=$BUMPED_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Build and tag docker image
