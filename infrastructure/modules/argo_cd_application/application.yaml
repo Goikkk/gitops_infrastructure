@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${app_name}
+  namespace: ${argocd_namespace}
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: ${account_id}.dkr.ecr.${region}.amazonaws.com/simple-app:~0
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:${argocd_namespace}/${git_secret}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ${github_repo_url}
+    targetRevision: HEAD
+    path: overlays/${env}/simple_app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ${app_namespace}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

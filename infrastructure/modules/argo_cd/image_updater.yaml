@@ -1,0 +1,31 @@
+config:
+  argocd:
+    serverAddress: "http://${argocd_server_name}.${argocd_namespace}.svc.cluster.local"
+    insecure: true
+    plaintext: true
+
+  registries:
+    - name: ECR
+      api_url: https://${aws_account_id}.dkr.ecr.${region}.amazonaws.com
+      prefix: ${aws_account_id}.dkr.ecr.${region}.amazonaws.com
+      credentials: ext:/scripts/ecr-login.sh
+      default: true
+
+extraEnv:
+  - name: AWS_REGION
+    value: ${region}
+  - name: AWS_ROLE_SESSION_NAME
+    value: cluster-name-argocd-image-updater
+
+authScripts:
+  enabled: true
+  scripts:
+    ecr-login.sh: |
+      #!/bin/sh
+      HOME=/tmp aws ecr --region $AWS_REGION get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d
+
+serviceAccount:
+  create: true
+  name: ${argocd_image_updater_name}
+  annotations:
+    eks.amazonaws.com/role-arn: ${iam_role_arn}
