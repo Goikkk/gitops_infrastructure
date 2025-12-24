@@ -41,7 +41,7 @@ jobs:
           RUN_NUMBER=${{ github.run_number }}
           SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
 
-          FEATURE_TAG=""BRANCH_NAME_CLEAN-$RUN_NUMBER-$SHORT_SHA"
+          FEATURE_TAG="$BRANCH_NAME_CLEAN-$RUN_NUMBER-$SHORT_SHA"
           echo "Feature branch tag: $FEATURE_TAG"
 
           echo "image_tag=$FEATURE_TAG" >> "$GITHUB_OUTPUT"
