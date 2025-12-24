@@ -13,7 +13,6 @@ for TAG in $TAGS; do
   if [[ $TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     if [ "$(printf '%s\n' "$HIGHEST" "$TAG" | sort -V | tail -n1)" = "$TAG" ]; then
       HIGHEST=$TAG
-      echo "$HIGHEST"
     fi
   fi
 done
