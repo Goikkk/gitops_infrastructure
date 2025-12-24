@@ -19,6 +19,10 @@ inputs = {
   name               = include.root.locals.resource_name_prefix
   kubernetes_version = 1.34
 
+  upgrade_policy = {
+    support_type = "STANDARD"
+  }
+
   enable_irsa = true
 
   vpc_id                   = dependency.vpc.outputs.vpc_id
