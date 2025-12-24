@@ -7,6 +7,10 @@ data "kubernetes_service" "nginx_ingress_service" {
   depends_on = [helm_release.nginx_ingress]
 }
 
+output "nlb_hostname" {
+  value     = data.kubernetes_service.nginx_ingress_service.status.0.load_balancer.0.ingress.0.hostname
+}
+
 output "nginx_ingress_service_ip" {
   value     = data.kubernetes_service.nginx_ingress_service.status.0.load_balancer.0.ingress.0.ip
   sensitive = true
