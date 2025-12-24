@@ -37,9 +37,14 @@ jobs:
         id: feature-branch-tag
         run: |
           BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+          BRANCH_NAME_CLEAN=$(echo "$BRANCH_NAME" | tr '/' '_')
           RUN_NUMBER=${{ github.run_number }}
           SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
-          echo "image_tag=$BRANCH_NAME-$RUN_NUMBER-$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+          FEATURE_TAG="$BRANCH_NAME_CLEAN-$RUN_NUMBER-$SHORT_SHA"
+          echo "Feature branch tag: $FEATURE_TAG"
+
+          echo "image_tag=$FEATURE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Create image tag for MAIN branch
         if: github.ref == 'refs/heads/main'
