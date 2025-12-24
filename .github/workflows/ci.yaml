@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/**'
+    paths-ignore:
+      - 'infrastructure/**'
+      - 'README.md'
+      - 'architecture_diagram.png'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-prod:
+    uses: ./.github/workflows/build.yaml
+    with:
+      environment: prod

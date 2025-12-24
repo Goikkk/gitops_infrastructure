@@ -1,0 +1,81 @@
+name: Build and push application image
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 10
+    outputs:
+      image_uri: ${{ steps.build-image.outputs.image_uri }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        with:
+          role-to-assume: ${{ vars.AWS_IAM_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
+      - name: Create image tag for FEATURE branch
+        if: github.ref != 'refs/heads/main'
+        id: feature-branch-tag
+        run: |
+          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+          RUN_NUMBER=${{ github.run_number }}
+          SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
+          echo "image_tag=$BRANCH_NAME-$RUN_NUMBER-$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create image tag for MAIN branch
+        if: github.ref == 'refs/heads/main'
+        id: main-branch-tag
+        run: |
+          COMMIT_MSG=${{ github.event.head_commit.message }}
+          if [[ "$COMMIT_MSG" == *"[MAJOR]"* ]]; then
+            BUMP_TYPE="major"
+          elif [[ "$COMMIT_MSG" == *"[MINOR]"* ]]; then
+            BUMP_TYPE="minor"
+          else
+            BUMP_TYPE="patch"
+          fi
+
+          echo "Detected bump type: $BUMP_TYPE"
+
+          TAGS=$(aws ecr describe-images \
+            --repository-name "$REPO_NAME" \
+            --region "$REGION" \
+            --query 'imageDetails[].imageTags[]' \
+            --output text | tr '\t' '\n')
+
+          BUMPED_TAG=$(bash .github/scripts/bump_version.sh $BUMP_TYPE "$TAGS")
+          echo "image_tag=$BUMPED_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build and tag docker image
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ steps.feature-branch-tag.outputs.image_tag || steps.main-branch-tag.outputs.image_tag }}
+        run: |
+          IMAGE_URI=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -t $IMAGE_URI .
+          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+
+      - name: Push image to ECR
+        run: |
+          docker push ${{ steps.build-image.outputs.image_uri }}
