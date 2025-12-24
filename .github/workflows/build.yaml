@@ -57,8 +57,8 @@ jobs:
           echo "Detected bump type: $BUMP_TYPE"
 
           TAGS=$(aws ecr describe-images \
-            --repository-name "$REPO_NAME" \
-            --region "$REGION" \
+            --repository-name ${{ vars.ECR_REPOSITORY_NAME }} \
+            --region ${{ vars.AWS_REGION }} \
             --query 'imageDetails[].imageTags[]' \
             --output text | tr '\t' '\n')
 
