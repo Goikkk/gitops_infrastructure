@@ -13,7 +13,7 @@ remote_state {
   }
 
   config = {
-    bucket = "gitops-infra-terraform-state-${local.env}-${local.region}"
+    bucket = "gitops-infrastructure-terraform-state-${local.env}-${local.region}"
 
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = local.region

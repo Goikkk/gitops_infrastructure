@@ -7,10 +7,10 @@ locals {
   # GitHub repositories (and optionally a branch/tag/environment) that will have access to the aws account
   # Case sensitive!
   # Doc: https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws
-  git_subject_claim_values = ["repo:Goikkk/gitops_infrastructure:*"]
+  git_subject_claim_values = ["repo:Goikkk/gitops_infrastructure:environment:prod"]
 
   # ARN of a cluster admin user / role
-  cluster_admin_arn = "arn:aws:iam::914567108126:user/terragrunt"
+  cluster_admin_arn = "arn:aws:iam::478822682668:user/rafal"
 
   # EKS node group configuration
   main_node_group = {
