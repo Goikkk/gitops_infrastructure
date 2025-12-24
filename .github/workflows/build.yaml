@@ -45,7 +45,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: main-branch-tag
         run: |
-          COMMIT_MSG=${{ github.event.head_commit.message }}
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
           if [[ "$COMMIT_MSG" == *"[MAJOR]"* ]]; then
             BUMP_TYPE="major"
           elif [[ "$COMMIT_MSG" == *"[MINOR]"* ]]; then
